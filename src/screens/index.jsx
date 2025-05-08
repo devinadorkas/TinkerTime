@@ -1,5 +1,7 @@
-import Home from "./Home";
-import Discover from "./Discover";
-import Bookmark from "./Bookmark";
-import Profile from "./Profile";
-export {Home, Discover, Bookmark, Profile}
+import Home from './Home';
+import Workshop from './Workshop';
+import Challenge from './Challenge';
+import Koleksi from './Koleksi';
+import Profile from './Profile';
+
+export { Home, Workshop, Challenge, Koleksi, Profile };

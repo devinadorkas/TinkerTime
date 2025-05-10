@@ -3,5 +3,6 @@ import Workshop from './Workshop';
 import Challenge from './Challenge';
 import Koleksi from './Koleksi';
 import Profile from './Profile';
+import WorkshopDetails from './WorkshopDetails';
 
-export { Home, Workshop, Challenge, Koleksi, Profile };
+export { Home, Workshop, Challenge, Koleksi, Profile, WorkshopDetails };

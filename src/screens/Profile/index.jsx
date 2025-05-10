@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { Edit, Heart, Bookmark, Setting, Logout } from 'iconsax-react-native';
 import { fontType, colors } from '../../theme';
-import { userData, recentActivities } from '../../data'; // Import data dari file terpisah
+import { userData, recentActivities } from '../../data';
 
 const Profile = () => {
   return (

@@ -2,10 +2,16 @@ import React from 'react';
 import {View, Text, ImageBackground, Pressable, StyleSheet} from 'react-native';
 import {fontType, colors} from '../theme';
 import {MagicStar} from 'iconsax-react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const WorkshopCard = ({data, onPress}) => {
+const WorkshopCard = ({ data }) => { 
+  const navigation = useNavigation();
+  
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <Pressable 
+      style={styles.card}
+      onPress={() => navigation.navigate('WorkshopDetail', { workshop: data })}
+    >
       <ImageBackground
         source={{uri: data.image}}
         style={styles.cardImage}

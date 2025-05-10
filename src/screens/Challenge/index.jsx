@@ -5,6 +5,7 @@ import { challengeList } from '../../data';
 import { fontType, colors } from '../../theme';
 
 const Challenge = () => {
+  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>

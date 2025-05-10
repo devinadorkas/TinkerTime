@@ -1,5 +1,11 @@
-import * as React from "react";
-import { Home, Workshop, Challenge, Koleksi, Profile } from "./src/screens";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import NavigationBar from './src/components/NavigationBar';
+
 export default function App() {
-  return <Profile />;
+  return (
+    <NavigationContainer>
+      <NavigationBar />
+    </NavigationContainer>
+  );
 }

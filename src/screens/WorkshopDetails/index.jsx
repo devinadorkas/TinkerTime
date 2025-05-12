@@ -1,5 +1,15 @@
-import React from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, Pressable, Linking } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { 
+  ScrollView, 
+  View, 
+  Text, 
+  Image, 
+  StyleSheet, 
+  Pressable, 
+  Linking,
+  Animated,
+  Easing
+} from 'react-native';
 import { ArrowLeft, Calendar, Star, Profile, Money, Clock, Location } from 'iconsax-react-native';
 import { fontType, colors } from '../../theme';
 import { useNavigation } from '@react-navigation/native';
@@ -8,22 +18,75 @@ const WorkshopDetail = ({ route }) => {
   const navigation = useNavigation();
   const { workshop } = route.params;
 
+  // Animasi values
+  const imageOpacity = useRef(new Animated.Value(0)).current;
+  const contentSlide = useRef(new Animated.Value(30)).current;
+  const buttonScale = useRef(new Animated.Value(0)).current;
+  const detailItemsAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Sequence animations
+    Animated.sequence([
+      // Image fade in
+      Animated.timing(imageOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      // Content slide up
+      Animated.timing(contentSlide, {
+        toValue: 0,
+        duration: 600,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      // Detail items animation
+      Animated.timing(detailItemsAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      // Button animation
+      Animated.spring(buttonScale, {
+        toValue: 1,
+        tension: 30,
+        friction: 7,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
+
   const handleRegister = () => {
     Linking.openURL('https://example.com/register');
   };
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header dengan gambar workshop */}
-      <Image source={{ uri: workshop.image }} style={styles.workshopImage} />
+      {/* Animated header image */}
+      <Animated.Image 
+        source={{ uri: workshop.image }} 
+        style={[
+          styles.workshopImage,
+          { opacity: imageOpacity }
+        ]}
+      />
       
-      {/* Tombol back */}
+      {/* Back button */}
       <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
         <ArrowLeft size={24} color={colors.white()} />
       </Pressable>
 
-      {/* Konten utama */}
-      <View style={styles.content}>
+      {/* Animated content */}
+      <Animated.View style={[
+        styles.content,
+        { 
+          transform: [{ translateY: contentSlide }],
+          opacity: contentSlide.interpolate({
+            inputRange: [0, 30],
+            outputRange: [1, 0]
+          })
+        }
+      ]}>
         <Text style={styles.title}>{workshop.title}</Text>
         
         <View style={styles.instructorContainer}>
@@ -32,37 +95,66 @@ const WorkshopDetail = ({ route }) => {
         </View>
 
         <View style={styles.ratingContainer}>
-          <Star size={20} color={colors.yellow()} variant="Bold" />
+          <Star size="20" color={colors.yellow()} variant="Bold" />
           <Text style={styles.rating}>{workshop.rating} ({workshop.reviews} reviews)</Text>
         </View>
 
         <Text style={styles.description}>{workshop.description}</Text>
 
-        {/* Detail info workshop */}
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailItem}>
-            <Calendar size={20} color={colors.pink()} />
-            <Text style={styles.detailText}>{workshop.date}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Clock size={20} color={colors.pink()} />
-            <Text style={styles.detailText}>{workshop.time}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Location size={20} color={colors.pink()} />
-            <Text style={styles.detailText}>{workshop.location}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Money size={20} color={colors.pink()} />
-            <Text style={styles.price}>${workshop.price}</Text>
-          </View>
-        </View>
+        {/* Animated details container */}
+        <Animated.View style={[
+          styles.detailsContainer,
+          {
+            opacity: detailItemsAnim,
+            transform: [{
+              translateY: detailItemsAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [20, 0]
+              })
+            }]
+          }
+        ]}>
+          {[
+            { icon: <Calendar size={20} color={colors.pink()} />, text: workshop.date },
+            { icon: <Clock size={20} color={colors.pink()} />, text: workshop.time },
+            { icon: <Location size={20} color={colors.pink()} />, text: workshop.location },
+            { icon: <Money size={20} color={colors.pink()} />, text: `$${workshop.price}` }
+          ].map((item, index) => (
+            <Animated.View 
+              key={index}
+              style={[
+                styles.detailItem,
+                {
+                  opacity: detailItemsAnim,
+                  transform: [{
+                    translateX: detailItemsAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [index % 2 === 0 ? -20 : 20, 0]
+                    })
+                  }]
+                }
+              ]}
+            >
+              {item.icon}
+              <Text style={index === 3 ? styles.price : styles.detailText}>
+                {item.text}
+              </Text>
+            </Animated.View>
+          ))}
+        </Animated.View>
 
-        {/* Tombol daftar */}
-        <Pressable style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>Register Now</Text>
-        </Pressable>
-      </View>
+        {/* Animated register button */}
+        <Animated.View style={{
+          transform: [{ scale: buttonScale }]
+        }}>
+          <Pressable 
+            style={styles.registerButton} 
+            onPress={handleRegister}
+          >
+            <Text style={styles.registerButtonText}>Register Now</Text>
+          </Pressable>
+        </Animated.View>
+      </Animated.View>
     </ScrollView>
   );
 };
@@ -84,6 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.purple(0.7),
     borderRadius: 20,
     padding: 8,
+    zIndex: 1,
   },
   content: {
     padding: 20,

@@ -1,13 +1,54 @@
-import React, {useState} from 'react';
-import {ScrollView, StyleSheet, Text, View, TextInput, Pressable, ImageBackground} from 'react-native';
-import {SearchNormal, MagicStar, Happyemoji, Brush2} from 'iconsax-react-native';
-import {fontType, colors} from '../../theme';
-import {ListHorizontal} from '../../components';
-import {categories, blogList} from '../../data';
+import React, { useState, useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, View, TextInput, Pressable, ImageBackground, Animated, Easing } from 'react-native';
+import { SearchNormal, MagicStar, Happyemoji, Brush2 } from 'iconsax-react-native';
+import { fontType, colors } from '../../theme';
+import { ListHorizontal } from '../../components';
+import { categories, blogList } from '../../data';
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState(null);
+  
+  // Animasi values
+  const titleAnim = useRef(new Animated.Value(0)).current;
+  const searchAnim = useRef(new Animated.Value(0)).current;
+  const categoryAnim = useRef(new Animated.Value(0)).current;
+  const footerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Sequence animations
+    Animated.sequence([
+      // Title animation
+      Animated.timing(titleAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.back(1)),
+        useNativeDriver: true,
+      }),
+      // Search animation
+      Animated.timing(searchAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      // Categories animation
+      Animated.timing(categoryAnim, {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: true,
+      }),
+      // Footer animation
+      Animated.timing(footerAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: 200,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
 
   const filteredBlogs = blogList.filter(blog =>
     blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -20,23 +61,66 @@ const Home = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header with craft paper background */}
-        <ImageBackground 
-            source={{uri: 'https://img.freepik.com/free-photo/crumpled-paper-texture_1194-6500.jpg'}}
-            style={styles.header}
-            imageStyle={styles.headerBackground}
-        >
-        <View style={styles.titleContainer}>
+      {/* Header with animations */}
+      <ImageBackground 
+        source={{uri: 'https://img.freepik.com/free-photo/crumpled-paper-texture_1194-6500.jpg'}}
+        style={styles.header}
+        imageStyle={styles.headerBackground}
+      >
+        <Animated.View style={[styles.titleContainer, {
+          transform: [{
+            scale: titleAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.8, 1]
+            })
+          }],
+          opacity: titleAnim
+        }]}>
           <Text style={styles.title}>TinkerTime!</Text>
-          <MagicStar size="24" color={colors.pink()} variant="Bold" />
-        </View>
-        <Text style={styles.subtitle}>Let's Build & Create Something Amazing!</Text>
+          <Animated.View style={{
+            transform: [{
+              rotate: titleAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['-30deg', '0deg']
+              })
+            }]
+          }}>
+            <MagicStar size="24" color={colors.pink()} variant="Bold" />
+          </Animated.View>
+        </Animated.View>
+
+        <Animated.Text style={[styles.subtitle, {
+          opacity: titleAnim,
+          transform: [{
+            translateY: titleAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [10, 0]
+            })
+          }]
+        }]}>
+          Let's Build & Create Something Amazing!
+        </Animated.Text>
         
-        {/* Search with cute icon */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchIcon}>
+        {/* Animated search bar */}
+        <Animated.View style={[styles.searchContainer, {
+          opacity: searchAnim,
+          transform: [{
+            translateY: searchAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+            })
+          }]
+        }]}>
+          <Animated.View style={[styles.searchIcon, {
+            transform: [{
+              scale: searchAnim.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [0.5, 1.1, 1]
+              })
+            }]
+          }]}>
             <SearchNormal size="20" color={colors.white()} variant="Bold" />
-          </View>
+          </Animated.View>
           <TextInput
             style={styles.searchInput}
             placeholder="Search for craft ideas..."
@@ -44,34 +128,71 @@ const Home = () => {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Pressable style={styles.emojiButton}>
-            <Happyemoji size="24" color={colors.yellow()} variant="Bold" />
-          </Pressable>
-        </View>
+          <Animated.View style={{
+            transform: [{
+              rotate: searchAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['30deg', '0deg']
+              })
+            }]
+          }}>
+            <Pressable style={styles.emojiButton}>
+              <Happyemoji size="24" color={colors.yellow()} variant="Bold" />
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
       </ImageBackground>
 
-      {/* Categories as colorful buttons */}
-      <ScrollView 
+      {/* Animated categories */}
+      <Animated.ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesContainer}
+        style={{
+          opacity: categoryAnim,
+          transform: [{
+            translateY: categoryAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [30, 0]
+            })
+          }]
+        }}
       >
-        {categories.map(category => (
-          <Pressable 
-            key={category.id} 
-            style={[
-              styles.categoryButton,
-              activeCategory === category.id && styles.activeCategory
-            ]}
-            onPress={() => setActiveCategory(activeCategory === category.id ? null : category.id)}
+        {categories.map((category, index) => (
+          <Animated.View 
+            key={category.id}
+            style={{
+              opacity: categoryAnim,
+              transform: [{
+                translateX: categoryAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [index % 2 === 0 ? -50 : 50, 0]
+                })
+              }]
+            }}
           >
-            <View style={styles.categoryIcon}>
-              <Brush2 size="18" color={colors.white()} variant="Bold" />
-            </View>
-            <Text style={styles.categoryText}>{category.name}</Text>
-          </Pressable>
+            <Pressable 
+              style={[
+                styles.categoryButton,
+                activeCategory === category.id && styles.activeCategory
+              ]}
+              onPress={() => setActiveCategory(activeCategory === category.id ? null : category.id)}
+            >
+              <Animated.View style={[styles.categoryIcon, {
+                transform: [{
+                  rotate: categoryAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['90deg', '0deg']
+                  })
+                }]
+              }]}>
+                <Brush2 size="18" color={colors.white()} variant="Bold" />
+              </Animated.View>
+              <Text style={styles.categoryText}>{category.name}</Text>
+            </Pressable>
+          </Animated.View>
         ))}
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Projects section */}
       <ListHorizontal 
@@ -79,21 +200,66 @@ const Home = () => {
         title="✨ Today's Crafty Ideas ✨" 
       />
 
-      {/* Footer with craft elements */}
-      <View style={styles.footer}>
-        <View style={styles.footerDecoration} />
-        <Text style={styles.footerText}>Let's Get Crafty! ✂️🧵</Text>
+      {/* Animated footer */}
+      <Animated.View style={[styles.footer, {
+        opacity: footerAnim,
+        transform: [{
+          translateY: footerAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [50, 0]
+          })
+        }]
+      }]}>
+        <Animated.View style={[styles.footerDecoration, {
+          transform: [{
+            scaleX: footerAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1]
+            })
+          }]
+        }]} />
         
-        <Pressable style={styles.footerButton}>
-          <Text style={styles.footerButtonText}>Share Your Creation</Text>
-        </Pressable>
+        <Animated.Text style={[styles.footerText, {
+          opacity: footerAnim,
+          transform: [{
+            scale: footerAnim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.8, 1.1, 1]
+            })
+          }]
+        }]}>
+          Let's Get Crafty! ✂️🧵
+        </Animated.Text>
         
-        <Pressable style={[styles.footerButton, styles.specialButton]}>
-          <Text style={styles.footerButtonText}>Ask for Craft Help</Text>
-        </Pressable>
+        <Animated.View style={{
+          transform: [{
+            scale: footerAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.9, 1]
+            })
+          }]
+        }}>
+          <Pressable style={styles.footerButton}>
+            <Text style={styles.footerButtonText}>Share Your Creation</Text>
+          </Pressable>
+          
+          <Pressable style={[styles.footerButton, styles.specialButton]}>
+            <Text style={styles.footerButtonText}>Ask for Craft Help</Text>
+          </Pressable>
+        </Animated.View>
         
-        <Text style={styles.copyright}>🎀 TinkerTime © 2023 🎀</Text>
-      </View>
+        <Animated.Text style={[styles.copyright, {
+          opacity: footerAnim,
+          transform: [{
+            rotate: footerAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['-5deg', '0deg']
+            })
+          }]
+        }]}>
+          🎀 TinkerTime © 2023 🎀
+        </Animated.Text>
+      </Animated.View>
     </ScrollView>
   );
 };

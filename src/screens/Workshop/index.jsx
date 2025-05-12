@@ -1,14 +1,66 @@
-import React, {useState} from 'react';
-import {ScrollView, StyleSheet, Text, View, TextInput, Pressable, ImageBackground} from 'react-native';
-import {SearchNormal, Calendar, Filter, Star} from 'iconsax-react-native';
-import {fontType, colors} from '../../theme';
-import {WorkshopList} from '../../components';
-import {workshops, workshopCategories} from '../../data';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  View, 
+  TextInput, 
+  Pressable, 
+  ImageBackground, 
+  Animated,
+  Easing
+} from 'react-native';
+import { SearchNormal, Calendar, Filter, Star } from 'iconsax-react-native';
+import { fontType, colors } from '../../theme';
+import { WorkshopList } from '../../components';
+import { workshops, workshopCategories } from '../../data';
 
 const Workshop = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeFilter, setActiveFilter] = useState('popular');
+  
+  // Animasi values
+  const headerAnim = useRef(new Animated.Value(0)).current;
+  const filterAnim = useRef(new Animated.Value(0)).current;
+  const categoryAnim = useRef(new Animated.Value(0)).current;
+  const footerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Sequence animations
+    Animated.sequence([
+      // Header animation
+      Animated.spring(headerAnim, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      // Filters animation
+      Animated.spring(filterAnim, {
+        toValue: 1,
+        delay: 200,
+        tension: 30,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      // Categories animation
+      Animated.spring(categoryAnim, {
+        toValue: 1,
+        delay: 300,
+        tension: 30,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+      // Footer animation
+      Animated.spring(footerAnim, {
+        toValue: 1,
+        delay: 400,
+        tension: 25,
+        friction: 6,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
 
   const filteredWorkshops = workshops.filter(workshop =>
     workshop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -29,115 +81,191 @@ const Workshop = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header with craft paper background */}
-      <ImageBackground 
-        source={{uri: 'https://img.freepik.com/free-photo/crumpled-paper-texture_1194-6500.jpg'}}
-        style={styles.header}
-        imageStyle={styles.headerBackground}
-      >
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>Workshop Wonderland!</Text>
-          <Text style={styles.subtitle}>Join our creative workshops and learn from the best</Text>
-          
-          {/* Search bar */}
-          <View style={styles.searchContainer}>
-            <View style={styles.searchIcon}>
-              <SearchNormal size="20" color={colors.white()} variant="Bold" />
-            </View>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search workshops..."
-              placeholderTextColor={colors.gray(0.7)}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
+      {/* Header with animation */}
+      <Animated.View style={{
+        transform: [{
+          translateY: headerAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-50, 0]
+          })
+        }],
+        opacity: headerAnim
+      }}>
+        <ImageBackground 
+          source={{uri: 'https://img.freepik.com/free-photo/crumpled-paper-texture_1194-6500.jpg'}}
+          style={styles.header}
+          imageStyle={styles.headerBackground}
+        >
+          <View style={styles.headerContent}>
+            <Animated.Text style={[styles.title, {
+              transform: [{
+                scale: headerAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1]
+                })
+              }]
+            }]}>
+              Workshop Wonderland!
+            </Animated.Text>
+            
+            <Animated.Text style={[styles.subtitle, {
+              opacity: headerAnim,
+              transform: [{
+                translateY: headerAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [10, 0]
+                })
+              }]
+            }]}>
+              Join our creative workshops and learn from the best
+            </Animated.Text>
+            
+            {/* Search bar */}
+            <Animated.View style={[styles.searchContainer, {
+              transform: [{
+                scale: headerAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.9, 1]
+                })
+              }]
+            }]}>
+              <Animated.View style={[styles.searchIcon, {
+                transform: [{
+                  rotate: headerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['-30deg', '0deg']
+                  })
+                }]
+              }]}>
+                <SearchNormal size="20" color={colors.white()} variant="Bold" />
+              </Animated.View>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search workshops..."
+                placeholderTextColor={colors.gray(0.7)}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </Animated.View>
           </View>
-        </View>
-      </ImageBackground>
+        </ImageBackground>
+      </Animated.View>
 
-      {/* Filter buttons */}
-      <ScrollView 
+      {/* Filter buttons with animation */}
+      <Animated.ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filterContainer}
+        style={{
+          transform: [{
+            translateY: filterAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [30, 0]
+            })
+          }],
+          opacity: filterAnim
+        }}
       >
-        <Pressable 
-          style={[
-            styles.filterButton,
-            activeFilter === 'popular' && styles.activeFilter
-          ]}
-          onPress={() => setActiveFilter('popular')}
-        >
-          <Star size="18" color={activeFilter === 'popular' ? colors.white() : colors.pink()} variant="Bold" />
-          <Text style={[
-            styles.filterText,
-            activeFilter === 'popular' && styles.activeFilterText
-          ]}>Popular</Text>
-        </Pressable>
-        
-        <Pressable 
-          style={[
-            styles.filterButton,
-            activeFilter === 'price-low' && styles.activeFilter
-          ]}
-          onPress={() => setActiveFilter('price-low')}
-        >
-          <Text style={[
-            styles.filterText,
-            activeFilter === 'price-low' && styles.activeFilterText
-          ]}>Price: Low to High</Text>
-        </Pressable>
-        
-        <Pressable 
-          style={[
-            styles.filterButton,
-            activeFilter === 'price-high' && styles.activeFilter
-          ]}
-          onPress={() => setActiveFilter('price-high')}
-        >
-          <Text style={[
-            styles.filterText,
-            activeFilter === 'price-high' && styles.activeFilterText
-          ]}>Price: High to Low</Text>
-        </Pressable>
-        
-        <Pressable 
-          style={[
-            styles.filterButton,
-            activeFilter === 'date' && styles.activeFilter
-          ]}
-          onPress={() => setActiveFilter('date')}
-        >
-          <Calendar size="18" color={activeFilter === 'date' ? colors.white() : colors.pink()} variant="Bold" />
-          <Text style={[
-            styles.filterText,
-            activeFilter === 'date' && styles.activeFilterText
-          ]}>Date</Text>
-        </Pressable>
-      </ScrollView>
+        {['popular', 'price-low', 'price-high', 'date'].map((filter, index) => (
+          <Animated.View 
+            key={filter}
+            style={{
+              transform: [{
+                scale: filterAnim.interpolate({
+                  inputRange: [0, 0.5, 1],
+                  outputRange: [0.5, 1.1, 1]
+                })
+              }]
+            }}
+          >
+            <Pressable 
+              style={[
+                styles.filterButton,
+                activeFilter === filter && styles.activeFilter
+              ]}
+              onPress={() => setActiveFilter(filter)}
+            >
+              {filter === 'popular' && (
+                <Animated.View style={{
+                  transform: [{
+                    rotate: filterAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['-30deg', '0deg']
+                    })
+                  }]
+                }}>
+                  <Star size="18" color={activeFilter === filter ? colors.white() : colors.pink()} variant="Bold" />
+                </Animated.View>
+              )}
+              {filter === 'date' && (
+                <Animated.View style={{
+                  transform: [{
+                    rotate: filterAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['30deg', '0deg']
+                    })
+                  }]
+                }}>
+                  <Calendar size="18" color={activeFilter === filter ? colors.white() : colors.pink()} variant="Bold" />
+                </Animated.View>
+              )}
+              <Text style={[
+                styles.filterText,
+                activeFilter === filter && styles.activeFilterText
+              ]}>
+                {filter === 'popular' ? 'Popular' : 
+                 filter === 'price-low' ? 'Price: Low to High' :
+                 filter === 'price-high' ? 'Price: High to Low' : 'Date'}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        ))}
+      </Animated.ScrollView>
 
-      {/* Categories */}
-      <ScrollView 
+      {/* Categories with animation */}
+      <Animated.ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesContainer}
+        style={{
+          transform: [{
+            translateY: categoryAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [30, 0]
+            })
+          }],
+          opacity: categoryAnim
+        }}
       >
-        {workshopCategories.map(category => (
-          <Pressable 
-            key={category.id} 
-            style={[
-              styles.categoryButton,
-              activeCategory === category.id && styles.activeCategory
-            ]}
-            onPress={() => setActiveCategory(category.id)}
+        {workshopCategories.map((category, index) => (
+          <Animated.View
+            key={category.id}
+            style={{
+              transform: [{
+                scale: categoryAnim.interpolate({
+                  inputRange: [0, 0.5, 1],
+                  outputRange: [0.5, 1.1, 1]
+                })
+              }]
+            }}
           >
-            <Text style={[
-              styles.categoryText,
-              activeCategory === category.id && styles.activeCategoryText
-            ]}>{category.name}</Text>
-          </Pressable>
+            <Pressable 
+              style={[
+                styles.categoryButton,
+                activeCategory === category.id && styles.activeCategory
+              ]}
+              onPress={() => setActiveCategory(category.id)}
+            >
+              <Text style={[
+                styles.categoryText,
+                activeCategory === category.id && styles.activeCategoryText
+              ]}>
+                {category.name}
+              </Text>
+            </Pressable>
+          </Animated.View>
         ))}
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Workshops list */}
       <WorkshopList 
@@ -145,14 +273,40 @@ const Workshop = () => {
         title="🎨 Featured Workshops" 
       />
 
-      {/* Footer */}
-      <View style={styles.footer}>
+      {/* Footer with animation */}
+      <Animated.View style={[styles.footer, {
+        transform: [{
+          translateY: footerAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [50, 0]
+          })
+        }],
+        opacity: footerAnim
+      }]}>
         <Text style={styles.footerText}>Can't find what you're looking for?</Text>
-        <Pressable style={styles.footerButton}>
-          <Text style={styles.footerButtonText}>Request a Workshop</Text>
-        </Pressable>
-        <Text style={styles.copyright}>✂️ TinkerTime Workshops © 2023 ✂️</Text>
-      </View>
+        <Animated.View style={{
+          transform: [{
+            scale: footerAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.8, 1]
+            })
+          }]
+        }}>
+          <Pressable style={styles.footerButton}>
+            <Text style={styles.footerButtonText}>Request a Workshop</Text>
+          </Pressable>
+        </Animated.View>
+        <Animated.Text style={[styles.copyright, {
+          transform: [{
+            rotate: footerAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['-5deg', '0deg']
+            })
+          }]
+        }]}>
+          ✂️ TinkerTime Workshops © 2023 ✂️
+        </Animated.Text>
+      </Animated.View>
     </ScrollView>
   );
 };
